@@ -1,17 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom"; // CAMBIO 1: USAR HashRouter
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Comedores from "./pages/Comedores";
 import Comedor from "./pages/Comedor";
-import AdminDashboard from './pages/AdminDashboard'; // [cite: 109]
+import AdminDashboard from './pages/AdminDashboard';
+
+// CAMBIO 2: Definir la URL base de tu Backend desplegado
+// ¡REEMPLAZA ESTA URL CON TU URL REAL DEL BACKEND!
+const API_BASE_URL = "https://sigcu-backend-api.com/api/auth"; // Ejemplo
 
 function App() {
   // Función para registrar usuario
   const handleRegister = async (form) => {
     try {
-      const res = await fetch("http://localhost:4000/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/register`, { // Usar API_BASE_URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -21,20 +25,20 @@ function App() {
 
       if (res.ok) {
         alert("Cuenta creada correctamente. Ahora inicia sesión.");
-        window.location.href = "/login";
+        window.location.href = "#/login"; // Redireccionar usando HashRouter
       } else {
         alert(data.error || "Error creando la cuenta");
       }
     } catch (err) {
       console.error("Error:", err);
-      alert("Error conectando al servidor");
+      alert("Error conectando al servidor. Verifica la URL del Backend.");
     }
   };
 
   // Función para iniciar sesión
   const handleLogin = async (form) => {
     try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/login`, { // Usar API_BASE_URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -46,18 +50,19 @@ function App() {
         alert("Bienvenido!");
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        window.location.href = "/dashboard";
+        window.location.href = "#/dashboard"; // Redireccionar usando HashRouter
       } else {
         alert(data.error || "Credenciales incorrectas");
       }
     } catch (err) {
       console.error("Error:", err);
-      alert("Error conectando al servidor");
+      alert("Error conectando al servidor. Verifica la URL del Backend.");
     }
   };
 
   return (
-    <BrowserRouter>
+    // CAMBIO 3: Usar HashRouter para compatibilidad con GitHub Pages
+    <HashRouter> 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
@@ -67,7 +72,7 @@ function App() {
         <Route path="/comedor/:comedorId" element={<Comedor />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
