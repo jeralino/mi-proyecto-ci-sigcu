@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // AGREGADO: Para la navegación
+import { useNavigate,Link } from "react-router-dom"; // AGREGADO: Para la navegación
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate(); // AGREGADO: Hook para redireccionar
