@@ -1,68 +1,58 @@
 import { useState } from "react";
-import { useNavigate,Link } from "react-router-dom"; // AGREGADO: Para la navegación
+import { useNavigate, Link } from "react-router-dom"; // 1. Importar Link y useNavigate
 
 export default function Login({ onLogin }) {
-  const navigate = useNavigate(); // AGREGADO: Hook para redireccionar
+  const navigate = useNavigate(); 
 
   // --- ESTADOS ORIGINALES ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // --- NUEVOS ESTADOS (Para el Switch y datos de Admin) ---
+  // --- ESTADOS NUEVOS (Pestañas y Admin) ---
   const [activeTab, setActiveTab] = useState("client"); // 'client' o 'admin'
   const [adminId, setAdminId] = useState("");
   const [adminName, setAdminName] = useState("");
 
-  // --- FUNCIÓN ORIGINAL (Cliente) ---
+  // --- FUNCIÓN LOGIN CLIENTE ---
   const handleSubmit = (e) => {
     e.preventDefault();
     onLogin({ email, password });
   };
 
-  // --- NUEVA FUNCIÓN (Admin con conexión al Backend) ---
+  // --- FUNCIÓN LOGIN ADMIN (BACKEND) ---
+  // NOTA: Recuerda cambiar localhost:4000 por la URL de Render cuando despliegues el backend
   const handleAdminLogin = async (e) => {
     e.preventDefault();
 
-    // 1. Validación visual básica
     if (adminId.trim() === "" || adminName.trim() === "") {
       alert("Por favor ingrese ID y Nombre del Administrador");
       return;
     }
 
     try {
-      // 2. Petición al Backend (Asegúrate que el puerto 4000 sea el correcto)
+      // URL del backend (Local para pruebas, luego cámbiala)
       const response = await fetch("http://localhost:4000/api/auth/admin-login-view", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          adminId: adminId,   // Enviamos el ID del input
-          adminName: adminName // Enviamos el Nombre del input
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminId, adminName }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // 3. Éxito: Guardamos datos y redirigimos
         localStorage.setItem("adminName", data.user.nombre);
         localStorage.setItem("adminRole", data.user.rol);
         localStorage.setItem("userId", data.user.id);
-        
-        // --- IMPORTANTE: Guardamos el Token para evitar el error 401 ---
-        localStorage.setItem("token", data.token); 
-        // -------------------------------------------------------------
+        localStorage.setItem("token", data.token); // Guardar Token es crítico
 
         console.log("Acceso concedido:", data.message);
         navigate("/admin-dashboard");
       } else {
-        // 4. Error: Mostramos el mensaje del backend
         alert(data.message || data.error || "Error al ingresar.");
       }
     } catch (error) {
       console.error("Error de conexión:", error);
-      alert("No se pudo conectar con el servidor.");
+      alert("No se pudo conectar con el servidor (Backend no disponible).");
     }
   };
 
@@ -75,7 +65,7 @@ export default function Login({ onLogin }) {
             UTM – Comedor Inteligente
           </h3>
 
-          {/* --- INICIO DE PESTAÑAS (SWITCH) --- */}
+          {/* --- PESTAÑAS (SWITCH) --- */}
           <div className="d-flex justify-content-center mb-4 gap-2">
             <button
               type="button"
@@ -92,15 +82,12 @@ export default function Login({ onLogin }) {
               Admin View
             </button>
           </div>
-          {/* --- FIN DE PESTAÑAS --- */}
 
-          {/* CONDICIONAL: Si es Cliente, muestra TU CÓDIGO ORIGINAL */}
+          {/* --- FORMULARIO CLIENTE --- */}
           {activeTab === "client" ? (
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label fw-semibold">
-                  Correo institucional
-                </label>
+                <label className="form-label fw-semibold">Correo institucional</label>
                 <input
                   type="email"
                   className="form-control form-control-lg"
@@ -128,13 +115,14 @@ export default function Login({ onLogin }) {
 
               <p className="text-center mt-4">
                 ¿No tienes cuenta?{" "}
-                <a href="/register" className="text-primary fw-semibold">
+                {/* 2. CORRECCIÓN CRÍTICA: Usar Link en lugar de <a> para evitar recargas */}
+                <Link to="/register" className="text-primary fw-semibold">
                   Crear cuenta
-                </a>
+                </Link>
               </p>
             </form>
           ) : (
-            /* --- SI NO ES CLIENTE, MUESTRA EL FORMULARIO ADMIN (NUEVO) --- */
+            /* --- FORMULARIO ADMIN --- */
             <form onSubmit={handleAdminLogin}>
               <div className="mb-3">
                 <label className="form-label fw-semibold text-danger">
@@ -167,7 +155,6 @@ export default function Login({ onLogin }) {
                 Ingresar Admin
               </button>
               
-              {/* Espacio vacío para mantener el tamaño de la tarjeta consistente */}
               <p className="text-center mt-4" style={{ visibility: "hidden" }}>
                  Espacio reservado
               </p>
