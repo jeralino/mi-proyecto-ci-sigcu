@@ -1,26 +1,23 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // 1. Importar Link y useNavigate
+import { useNavigate, Link } from "react-router-dom"; // 1. Importamos Link
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate(); 
 
-  // --- ESTADOS ORIGINALES ---
+  // --- ESTADOS ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // --- ESTADOS NUEVOS (Pestañas y Admin) ---
-  const [activeTab, setActiveTab] = useState("client"); // 'client' o 'admin'
+  const [activeTab, setActiveTab] = useState("client"); 
   const [adminId, setAdminId] = useState("");
   const [adminName, setAdminName] = useState("");
 
-  // --- FUNCIÓN LOGIN CLIENTE ---
+  // --- LOGIN CLIENTE ---
   const handleSubmit = (e) => {
     e.preventDefault();
     onLogin({ email, password });
   };
 
-  // --- FUNCIÓN LOGIN ADMIN (BACKEND) ---
-  // NOTA: Recuerda cambiar localhost:4000 por la URL de Render cuando despliegues el backend
+  // --- LOGIN ADMIN ---
   const handleAdminLogin = async (e) => {
     e.preventDefault();
 
@@ -30,7 +27,7 @@ export default function Login({ onLogin }) {
     }
 
     try {
-      // URL del backend (Local para pruebas, luego cámbiala)
+      // Recuerda cambiar esta URL cuando tengas el backend en Render
       const response = await fetch("http://localhost:4000/api/auth/admin-login-view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,16 +40,16 @@ export default function Login({ onLogin }) {
         localStorage.setItem("adminName", data.user.nombre);
         localStorage.setItem("adminRole", data.user.rol);
         localStorage.setItem("userId", data.user.id);
-        localStorage.setItem("token", data.token); // Guardar Token es crítico
+        localStorage.setItem("token", data.token);
 
         console.log("Acceso concedido:", data.message);
-        navigate("/admin-dashboard");
+        navigate("/admin-dashboard"); // Correcto: Usa navigate
       } else {
         alert(data.message || data.error || "Error al ingresar.");
       }
     } catch (error) {
       console.error("Error de conexión:", error);
-      alert("No se pudo conectar con el servidor (Backend no disponible).");
+      alert("No se pudo conectar con el servidor.");
     }
   };
 
@@ -65,7 +62,7 @@ export default function Login({ onLogin }) {
             UTM – Comedor Inteligente
           </h3>
 
-          {/* --- PESTAÑAS (SWITCH) --- */}
+          {/* PESTAÑAS */}
           <div className="d-flex justify-content-center mb-4 gap-2">
             <button
               type="button"
@@ -83,7 +80,7 @@ export default function Login({ onLogin }) {
             </button>
           </div>
 
-          {/* --- FORMULARIO CLIENTE --- */}
+          {/* FORMULARIOS */}
           {activeTab === "client" ? (
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -115,32 +112,30 @@ export default function Login({ onLogin }) {
 
               <p className="text-center mt-4">
                 ¿No tienes cuenta?{" "}
-                {/* 2. CORRECCIÓN CRÍTICA: Usar Link en lugar de <a> para evitar recargas */}
+                {/* --- AQUÍ ESTABA EL ERROR --- */}
+                {/* ANTES: <a href="/register" ...> (Causa error 404) */}
+                {/* AHORA: Usamos Link para navegar dentro del HashRouter */}
                 <Link to="/register" className="text-primary fw-semibold">
                   Crear cuenta
                 </Link>
+                {/* --------------------------- */}
               </p>
             </form>
           ) : (
-            /* --- FORMULARIO ADMIN --- */
             <form onSubmit={handleAdminLogin}>
               <div className="mb-3">
-                <label className="form-label fw-semibold text-danger">
-                  ID Único de Administrador
-                </label>
+                <label className="form-label fw-semibold text-danger">ID Único de Administrador</label>
                 <input
                   type="text"
                   className="form-control form-control-lg"
-                  placeholder="Ej: 3 (ID numérico)"
+                  placeholder="Ej: 3"
                   value={adminId}
                   onChange={(e) => setAdminId(e.target.value)}
                 />
               </div>
 
               <div className="mb-4">
-                <label className="form-label fw-semibold text-danger">
-                  Nombre del Administrador
-                </label>
+                <label className="form-label fw-semibold text-danger">Nombre del Administrador</label>
                 <input
                   type="text"
                   className="form-control form-control-lg"
@@ -155,9 +150,7 @@ export default function Login({ onLogin }) {
                 Ingresar Admin
               </button>
               
-              <p className="text-center mt-4" style={{ visibility: "hidden" }}>
-                 Espacio reservado
-              </p>
+              <p className="text-center mt-4" style={{ visibility: "hidden" }}>Espacio reservado</p>
             </form>
           )}
         </div>
