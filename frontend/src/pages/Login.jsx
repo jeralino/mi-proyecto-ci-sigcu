@@ -1,37 +1,46 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // 1. Importamos Link
+// 1. IMPORTAR LINK: Esto es clave para que no te dé error 404
+import { useNavigate, Link } from "react-router-dom"; 
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate(); 
 
-  // --- ESTADOS ---
+  // --- ESTADOS ORIGINALES ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [activeTab, setActiveTab] = useState("client"); 
+
+  // --- NUEVOS ESTADOS (Para el Switch y datos de Admin) ---
+  const [activeTab, setActiveTab] = useState("client"); // 'client' o 'admin'
   const [adminId, setAdminId] = useState("");
   const [adminName, setAdminName] = useState("");
 
-  // --- LOGIN CLIENTE ---
+  // --- FUNCIÓN ORIGINAL (Cliente) ---
   const handleSubmit = (e) => {
     e.preventDefault();
     onLogin({ email, password });
   };
 
-  // --- LOGIN ADMIN ---
+  // --- NUEVA FUNCIÓN (Admin) ---
   const handleAdminLogin = async (e) => {
     e.preventDefault();
 
+    // 1. Validación visual básica
     if (adminId.trim() === "" || adminName.trim() === "") {
       alert("Por favor ingrese ID y Nombre del Administrador");
       return;
     }
 
     try {
-      // Recuerda cambiar esta URL cuando tengas el backend en Render
+      // 2. Petición al Backend (Asegúrate que el puerto 4000 sea el correcto)
       const response = await fetch("http://localhost:4000/api/auth/admin-login-view", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminId, adminName }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          adminId: adminId, 
+          adminName: adminName 
+        }),
       });
 
       const data = await response.json();
@@ -40,10 +49,12 @@ export default function Login({ onLogin }) {
         localStorage.setItem("adminName", data.user.nombre);
         localStorage.setItem("adminRole", data.user.rol);
         localStorage.setItem("userId", data.user.id);
-        localStorage.setItem("token", data.token);
-
+        
+        // --- IMPORTANTE: Guardamos el Token ---
+        localStorage.setItem("token", data.token); 
+        
         console.log("Acceso concedido:", data.message);
-        navigate("/admin-dashboard"); // Correcto: Usa navigate
+        navigate("/admin-dashboard");
       } else {
         alert(data.message || data.error || "Error al ingresar.");
       }
@@ -62,7 +73,7 @@ export default function Login({ onLogin }) {
             UTM – Comedor Inteligente
           </h3>
 
-          {/* PESTAÑAS */}
+          {/* --- INICIO DE PESTAÑAS (SWITCH) --- */}
           <div className="d-flex justify-content-center mb-4 gap-2">
             <button
               type="button"
@@ -84,7 +95,9 @@ export default function Login({ onLogin }) {
           {activeTab === "client" ? (
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label fw-semibold">Correo institucional</label>
+                <label className="form-label fw-semibold">
+                  Correo institucional
+                </label>
                 <input
                   type="email"
                   className="form-control form-control-lg"
@@ -112,30 +125,32 @@ export default function Login({ onLogin }) {
 
               <p className="text-center mt-4">
                 ¿No tienes cuenta?{" "}
-                {/* --- AQUÍ ESTABA EL ERROR --- */}
-                {/* ANTES: <a href="/register" ...> (Causa error 404) */}
-                {/* AHORA: Usamos Link para navegar dentro del HashRouter */}
+                {/* 2. SOLUCIÓN: Usamos Link en lugar de <a> */}
+                {/* Esto evita que la página se recargue y pierda la ruta */}
                 <Link to="/register" className="text-primary fw-semibold">
                   Crear cuenta
                 </Link>
-                {/* --------------------------- */}
               </p>
             </form>
           ) : (
             <form onSubmit={handleAdminLogin}>
               <div className="mb-3">
-                <label className="form-label fw-semibold text-danger">ID Único de Administrador</label>
+                <label className="form-label fw-semibold text-danger">
+                  ID Único de Administrador
+                </label>
                 <input
                   type="text"
                   className="form-control form-control-lg"
-                  placeholder="Ej: 3"
+                  placeholder="Ej: 3 (ID numérico)"
                   value={adminId}
                   onChange={(e) => setAdminId(e.target.value)}
                 />
               </div>
 
               <div className="mb-4">
-                <label className="form-label fw-semibold text-danger">Nombre del Administrador</label>
+                <label className="form-label fw-semibold text-danger">
+                  Nombre del Administrador
+                </label>
                 <input
                   type="text"
                   className="form-control form-control-lg"
@@ -150,7 +165,9 @@ export default function Login({ onLogin }) {
                 Ingresar Admin
               </button>
               
-              <p className="text-center mt-4" style={{ visibility: "hidden" }}>Espacio reservado</p>
+              <p className="text-center mt-4" style={{ visibility: "hidden" }}>
+                 Espacio reservado
+              </p>
             </form>
           )}
         </div>

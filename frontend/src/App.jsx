@@ -1,4 +1,3 @@
-// 1. IMPORTANTE: Cambiamos BrowserRouter por HashRouter
 import { HashRouter, Routes, Route, useNavigate } from "react-router-dom"; 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -8,15 +7,15 @@ import Comedores from "./pages/Comedores";
 import Comedor from "./pages/Comedor";
 import AdminDashboard from './pages/AdminDashboard';
 
-// NOTA: Cuando subas tu backend a la nube, cambiarás esta URL.
-// Por ahora, si solo quieres arreglar el 404 del frontend, déjalo así, 
-// pero recuerda que el login no funcionará hasta que el backend sea público.
+// NOTA: Cuando tengas tu backend en Render, cambiarás esta URL.
+// Por ahora, para pruebas locales usa localhost.
 const API_BASE_URL = "http://localhost:4000/api/auth"; 
 
-// Creamos un componente interno para poder usar el hook 'useNavigate'
+// Creamos un componente interno para poder usar el hook 'useNavigate' dentro del Router
 function AppContent() {
   const navigate = useNavigate(); 
 
+  // Función para registrar usuario
   const handleRegister = async (form) => {
     try {
       const res = await fetch(`${API_BASE_URL}/register`, {
@@ -28,7 +27,7 @@ function AppContent() {
 
       if (res.ok) {
         alert("Cuenta creada correctamente. Ahora inicia sesión.");
-        navigate("/login"); // Navegación correcta
+        navigate("/login"); // Navegación segura con HashRouter
       } else {
         alert(data.error || "Error creando la cuenta");
       }
@@ -38,6 +37,7 @@ function AppContent() {
     }
   };
 
+  // Función para iniciar sesión
   const handleLogin = async (form) => {
     try {
       const res = await fetch(`${API_BASE_URL}/login`, {
@@ -51,7 +51,7 @@ function AppContent() {
         alert("Bienvenido!");
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/dashboard"); // Navegación correcta
+        navigate("/dashboard"); // Navegación segura con HashRouter
       } else {
         alert(data.error || "Credenciales incorrectas");
       }
@@ -64,8 +64,11 @@ function AppContent() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      
+      {/* Pasamos las funciones como props para que los formularios funcionen */}
       <Route path="/login" element={<Login onLogin={handleLogin} />} />
       <Route path="/register" element={<Register onRegister={handleRegister} />} />
+      
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/comedores/:facultadId" element={<Comedores />} />
       <Route path="/comedor/:comedorId" element={<Comedor />} />
@@ -76,7 +79,7 @@ function AppContent() {
 
 function App() {
   return (
-    // 2. Aquí envolvemos todo con HashRouter
+    // Aquí envolvemos todo con HashRouter para compatibilidad con GitHub Pages
     <HashRouter>
       <AppContent />
     </HashRouter>
