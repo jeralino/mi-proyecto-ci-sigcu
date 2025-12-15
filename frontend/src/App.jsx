@@ -1,4 +1,5 @@
-import { HashRouter, Routes, Route, useNavigate } from "react-router-dom"; // 1. HashRouter y useNavigate
+// 1. IMPORTANTE: Cambiamos BrowserRouter por HashRouter
+import { HashRouter, Routes, Route, useNavigate } from "react-router-dom"; 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -7,14 +8,15 @@ import Comedores from "./pages/Comedores";
 import Comedor from "./pages/Comedor";
 import AdminDashboard from './pages/AdminDashboard';
 
-// URL de tu backend desplegado (REEMPLAZAR CON LA REAL)
-const API_BASE_URL = "https://tu-backend-en-dockerhub-o-render.com/api/auth";
+// NOTA: Cuando subas tu backend a la nube, cambiarás esta URL.
+// Por ahora, si solo quieres arreglar el 404 del frontend, déjalo así, 
+// pero recuerda que el login no funcionará hasta que el backend sea público.
+const API_BASE_URL = "http://localhost:4000/api/auth"; 
 
-// Componente interno para manejar la lógica de navegación
+// Creamos un componente interno para poder usar el hook 'useNavigate'
 function AppContent() {
-  const navigate = useNavigate(); // 2. Hook para navegar sin recargar
+  const navigate = useNavigate(); 
 
-  // Función para registrar usuario
   const handleRegister = async (form) => {
     try {
       const res = await fetch(`${API_BASE_URL}/register`, {
@@ -22,12 +24,11 @@ function AppContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
       const data = await res.json();
 
       if (res.ok) {
         alert("Cuenta creada correctamente. Ahora inicia sesión.");
-        navigate("/login"); // 3. Usamos navigate en vez de window.location
+        navigate("/login"); // Navegación correcta
       } else {
         alert(data.error || "Error creando la cuenta");
       }
@@ -37,7 +38,6 @@ function AppContent() {
     }
   };
 
-  // Función para iniciar sesión
   const handleLogin = async (form) => {
     try {
       const res = await fetch(`${API_BASE_URL}/login`, {
@@ -45,14 +45,13 @@ function AppContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
       const data = await res.json();
 
       if (res.ok) {
         alert("Bienvenido!");
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/dashboard"); // 3. Usamos navigate en vez de window.location
+        navigate("/dashboard"); // Navegación correcta
       } else {
         alert(data.error || "Credenciales incorrectas");
       }
@@ -77,7 +76,7 @@ function AppContent() {
 
 function App() {
   return (
-    // 4. Envolvemos todo en HashRouter
+    // 2. Aquí envolvemos todo con HashRouter
     <HashRouter>
       <AppContent />
     </HashRouter>
