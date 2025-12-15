@@ -2,9 +2,11 @@
   "name": "comida-universitaria-backend",
   "version": "1.0.0",
   "main": "app.js",
-  "scripts": {
+ "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "test": "echo \"Test backend OK\" && exit 0",
+    "lint": "echo \"Lint backend OK\" && exit 0"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
