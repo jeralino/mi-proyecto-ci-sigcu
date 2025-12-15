@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom"; // <--- 1. IMPORTAR LINK
+
+// URL del Backend
+const API_BASE_URL = "https://sigcu-api.onrender.com/api"; 
 
 export default function Register() {
+  const navigate = useNavigate();
   const [facultades, setFacultades] = useState([]);
 
   const [form, setForm] = useState({
@@ -10,22 +15,19 @@ export default function Register() {
     facultad_id: "",
   });
 
-  // Cargar facultades desde backend
   useEffect(() => {
-    fetch("http://localhost:4000/api/facultades")
+    fetch(`${API_BASE_URL}/facultades`)
       .then((res) => res.json())
       .then((data) => setFacultades(data))
       .catch((err) => console.error("Error cargando facultades", err));
   }, []);
 
-  // Manejo de cambios en el formulario
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // 🚀 FUNCIÓN QUE REALIZA EL REGISTRO EN EL BACKEND
   const handleRegister = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -33,16 +35,15 @@ export default function Register() {
           email: form.email,
           password: form.password,
           rol: "estudiante",
-          facultad_id: form.facultad_id, // ✅ CORREGIDO
+          facultad_id: form.facultad_id,
         }),
       });
 
       const data = await res.json();
-      console.log("Respuesta backend:", data);
 
       if (res.ok) {
         alert("Cuenta creada con éxito");
-        window.location.href = "/login";
+        navigate("/login"); 
       } else {
         alert("Error: " + data.error);
       }
@@ -130,9 +131,11 @@ export default function Register() {
 
           <p className="text-center mt-4">
             ¿Ya tienes cuenta?{" "}
-            <a href="/login" className="text-success fw-semibold">
+            {/* 2. AQUÍ ESTÁ LA SOLUCIÓN: Usamos Link en lugar de <a> */}
+            {/* Esto obliga a la URL a mantenerse con el # */}
+            <Link to="/login" className="text-success fw-semibold">
               Iniciar sesión
-            </a>
+            </Link>
           </p>
         </div>
       </div>
