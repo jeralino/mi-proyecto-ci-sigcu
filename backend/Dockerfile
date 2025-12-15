@@ -1,19 +1,21 @@
-# Imagen base
-FROM node:20-alpine
+# 1. Imagen base ligera
+FROM node:18-alpine
 
-# Crear carpeta de trabajo
+# 2. Carpeta de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar package.json e instalar dependencias
+# 3. Copiar archivos de dependencias
 COPY package*.json ./
-RUN npm install --only=production
 
-# Copiar el código
-COPY src ./src
+# 4. Instalar dependencias (limpio y rápido)
+RUN npm ci --only=production
 
-# Exponer puerto
+# 5. IMPORTANTE: Copiar TODO el código actual al contenedor
+# (Aquí estaba el error, antes decía "COPY src ./src")
+COPY . .
+
+# 6. Puerto que usa tu app
 EXPOSE 4000
 
-# Comando de arranque
-CMD ["node", "src/index.js"]
-
+# 7. Comando de inicio (asegúrate que en package.json tengas el script "start")
+CMD ["npm", "start"]
